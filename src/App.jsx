@@ -22,6 +22,18 @@ function formatCurrency(value) {
   return currency.format(value || 0);
 }
 
+function formatAmountInput(value) {
+  if (!value) {
+    return '';
+  }
+
+  return new Intl.NumberFormat('id-ID').format(Number(value));
+}
+
+function sanitizeAmountInput(value) {
+  return value.replace(/\D/g, '');
+}
+
 function formatDate(dateString) {
   return new Intl.DateTimeFormat('id-ID', {
     day: '2-digit',
@@ -256,11 +268,16 @@ export default function App() {
             <label>
               Nominal
               <input
-                type="number"
-                min="0"
-                placeholder="Masukkan nominal"
-                value={form.amount}
-                onChange={(event) => setForm((current) => ({ ...current, amount: event.target.value }))}
+                type="text"
+                inputMode="numeric"
+                placeholder="Contoh: 100.000"
+                value={formatAmountInput(form.amount)}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    amount: sanitizeAmountInput(event.target.value),
+                  }))
+                }
               />
             </label>
 
