@@ -2,36 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { addDoc, collection, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore';
 import { db, hasFirebaseEnv } from './firebase';
 
-const starterTransactions = [
-  {
-    id: 'seed-1',
-    type: 'Pemasukan',
-    category: 'Iuran Anggota',
-    amount: 1500000,
-    date: '2026-04-01',
-    note: 'Iuran bulanan anggota Rotation',
-    source: 'Manual',
-  },
-  {
-    id: 'seed-2',
-    type: 'Pengeluaran',
-    category: 'Konsumsi Rapat',
-    amount: 325000,
-    date: '2026-04-05',
-    note: 'Snack dan minuman rapat koordinasi',
-    source: 'Manual',
-  },
-  {
-    id: 'seed-3',
-    type: 'Pemasukan',
-    category: 'Donasi',
-    amount: 750000,
-    date: '2026-04-07',
-    note: 'Donasi alumni untuk kegiatan sosial',
-    source: 'Manual',
-  },
-];
-
 const currency = new Intl.NumberFormat('id-ID', {
   style: 'currency',
   currency: 'IDR',
@@ -61,11 +31,13 @@ function formatDate(dateString) {
 }
 
 export default function App() {
-  const [transactions, setTransactions] = useState(starterTransactions);
+  const [transactions, setTransactions] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [filter, setFilter] = useState('Semua');
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('Mode demo aktif. Hubungkan Firebase untuk sinkronisasi realtime.');
+  const [status, setStatus] = useState(
+    hasFirebaseEnv ? 'Firebase aktif. Data transaksi tersinkron realtime.' : 'Mode demo aktif. Hubungkan Firebase untuk sinkronisasi realtime.',
+  );
 
   useEffect(() => {
     if (!hasFirebaseEnv || !db) {
@@ -161,7 +133,7 @@ export default function App() {
   }
 
   async function handleDelete(id) {
-    if (hasFirebaseEnv && db && !String(id).startsWith('seed-') && !String(id).startsWith('local-')) {
+    if (hasFirebaseEnv && db && !String(id).startsWith('local-')) {
       await deleteDoc(doc(db, 'transactions', id));
       setStatus('Transaksi dihapus dari Firebase.');
       return;
@@ -169,6 +141,24 @@ export default function App() {
 
     setTransactions((current) => current.filter((item) => item.id !== id));
     setStatus('Transaksi dihapus dari daftar.');
+  }
+
+  async function handleResetAll() {
+    if (transactions.length === 0) {
+      setStatus('Data sudah kosong. Saldo saat ini Rp0.');
+      return;
+    }
+
+    if (hasFirebaseEnv && db) {
+      await Promise.all(
+        transactions.map((item) => deleteDoc(doc(db, 'transactions', item.id))),
+      );
+      setStatus('Semua transaksi di Firebase berhasil dihapus. Saldo kembali Rp0.');
+      return;
+    }
+
+    setTransactions([]);
+    setStatus('Semua transaksi lokal dihapus. Saldo kembali Rp0.');
   }
 
   return (
@@ -312,6 +302,9 @@ export default function App() {
               Gunakan kategori yang konsisten supaya laporan lebih mudah dibaca. Saat Firebase
               aktif, seluruh transaksi akan disimpan di cloud dan bisa dipakai lintas perangkat.
             </p>
+            <button type="button" className="secondary-action" onClick={handleResetAll}>
+              Reset Semua Data
+            </button>
           </div>
         </section>
 

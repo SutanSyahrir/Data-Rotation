@@ -316,6 +316,23 @@ button {
   color: var(--text-muted);
 }
 
+.secondary-action {
+  margin-top: 18px;
+  border: 1px solid rgba(25, 123, 67, 0.18);
+  border-radius: 16px;
+  background: #ffffff;
+  color: var(--primary-deep);
+  font-weight: 800;
+  padding: 13px 16px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.secondary-action:hover {
+  background: #f2fff6;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(25, 123, 67, 0.14);
+}
+
 .panel__header--table {
   align-items: center;
 }
