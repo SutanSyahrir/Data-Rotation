@@ -1,0 +1,12 @@
+node_modules
+dist
+.env
+.env.local
+.firebase
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.docx
+*.xlsx
+*.tmp
